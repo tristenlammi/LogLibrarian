@@ -1,20 +1,21 @@
 # LogLibrarian
 
-**Self-hosted, AI-powered log analysis and troubleshooting platform**
+**Self-hosted infrastructure monitoring platform for uptime tracking, metrics collection, and centralized log management**
 
 ## Architecture
 
 ```
 ┌─────────────┐      ┌──────────────┐      ┌─────────────┐
 │   Scribe    │─────▶│  Librarian   │◀────▶│  Dashboard  │
-│  (Go Agent) │      │ (Python API) │      │  (Vue.js)   │
+│  (Go Agent) │ WS   │ (Python API) │      │  (Vue.js)   │
 └─────────────┘      └──────────────┘      └─────────────┘
-                            │
-                            ▼
-                     ┌─────────────┐
-                     │   Qdrant    │
-                     │ (Vector DB) │
-                     └─────────────┘
+       │                    │
+       │              ┌─────┴─────┐
+       │              │           │
+       ▼              ▼           ▼
+   Metrics      ┌──────────┐  ┌───────┐
+   & Logs       │TimescaleDB│  │ Redis │
+                └──────────┘  └───────┘
 ```
 
 ## Quick Start (Docker)
@@ -42,7 +43,6 @@ docker compose ps
 **Services will be available at:**
 - Dashboard: http://localhost:3000
 - Backend API: http://localhost:8000
-- Qdrant: http://localhost:6333
 
 ### Stop the Platform
 
@@ -102,12 +102,11 @@ The installation script will:
 
 ## Development Setup
 
-### 1. Qdrant (Vector Database)
+### 1. Database Services
 
 ```bash
-docker run -p 6333:6333 -p 6334:6334 \
-    -v $(pwd)/qdrant_storage:/qdrant/storage:z \
-    qdrant/qdrant
+# Start TimescaleDB and Redis
+docker compose up -d timescaledb redis
 ```
 
 ### 2. Librarian Backend (Python)
@@ -213,21 +212,27 @@ sudo ./scribe-linux -uninstall
 
 ### 1. View Dashboard
 Open http://localhost:3000 to see:
-- Server status cards
-- Recent log activity
-- Statistics overview
+- Server status cards with real-time metrics
+- CPU, RAM, disk, and network usage
+- Uptime tracking and alerts
 
-### 2. Chat with AI
-Navigate to **"Librarian"** (🤖) in the sidebar to ask questions:
-- "Show me recent errors"
-- "What servers are having issues?"
-- "Summarize today's activity"
+### 2. Monitor Agents
+Go to **"Agents"** to see all connected Scribe instances with:
+- Live metrics streaming
+- Historical data graphs
+- System information
 
-### 3. Monitor Agents
-Go to **"Agents"** (🖥️) to see connected Scribe instances.
+### 3. Browse Logs
+Use **"Logs"** to search and filter collected logs by:
+- Severity level
+- Time range
+- Agent/server
 
-### 4. Browse Logs
-Use **"Logs"** (📝) to search and filter log templates.
+### 4. Configure Alerts
+Set up alert rules to get notified when:
+- Servers go offline
+- CPU/RAM exceeds thresholds
+- Disk space runs low
 
 ## How It Works
 
@@ -252,9 +257,9 @@ The Scribe agent compresses logs before sending:
 
 ### Storage Strategy
 
-- **Qdrant (Vector DB)**: Stores unique log templates as embeddings for semantic search
-- **SQLite**: Stores individual log occurrences with timestamps and variables
-- **AI Model**: Uses `all-MiniLM-L6-v2` for embeddings (local, no API keys needed)
+- **TimescaleDB**: Time-series optimized PostgreSQL for metrics and logs
+- **Redis**: Message queue for high-throughput metric ingestion
+- **Automatic Compression**: TimescaleDB compresses older data automatically
 
 ## Tech Stack
 
@@ -263,26 +268,24 @@ The Scribe agent compresses logs before sending:
 | Agent      | Go 1.21+ |
 | Backend    | Python 3.10, FastAPI |
 | Frontend   | Vue.js 3, Vite, Bootstrap 5 |
-| Vector DB  | Qdrant |
-| Embeddings | Sentence Transformers |
-| AI (TODO)  | Ollama (local LLM) |
+| Database   | TimescaleDB (PostgreSQL) |
+| Cache      | Redis |
 
 ## Troubleshooting
 
 ### Backend won't start
 ```bash
-# Check Qdrant is running
-curl http://localhost:6333/collections
+# Check database is running
+docker compose ps
 
-# Check Python dependencies
-pip install -r librarian/requirements.txt
+# Check logs
+docker compose logs librarian
 ```
 
-### Dashboard shows "AI Not Connected Yet"
-The Ollama integration is pending. The backend returns a placeholder response.
-
-### Scribe agent can't connect
-Ensure the backend is running and update `serverURL` in `scribe/main.go`.
+### Agent not appearing in dashboard
+1. Check the agent service is running
+2. Verify the backend URL in the agent's `config.json`
+3. Check firewall allows port 8000
 
 ### Port conflicts
 Edit `docker-compose.yml` to change ports:
@@ -295,18 +298,19 @@ ports:
 
 ### Environment Variables
 
-Create `.env` files:
+Create a `.env` file in the project root:
 
-**librarian/.env:**
-```
-QDRANT_HOST=qdrant
-QDRANT_PORT=6333
-SQLITE_DB_PATH=/data/loglibrarian.db
+```bash
+# Required - change in production!
+SECRET_KEY=your-random-secret-key-here
+
+# Optional - database password
+POSTGRES_PASSWORD=your-secure-password
 ```
 
-**dashboard/.env:**
-```
-VITE_API_URL=https://your-backend.com
+Generate a secret key:
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
 ### Security Hardening
@@ -316,18 +320,19 @@ VITE_API_URL=https://your-backend.com
 3. **Restrict CORS** (update `allow_origins` in `librarian/main.py`)
 4. **Set resource limits** in docker-compose
 
-## Development Roadmap
+## Features
 
-- [x] Scribe agent with semantic compression
-- [x] Backend API with vector storage
-- [x] Dashboard with Uptime Kuma theme
-- [x] Real-time chat interface
-- [ ] Ollama LLM integration
-- [ ] WebSocket real-time updates
-- [ ] Agent health monitoring
-- [ ] Alert rules and notifications
+- [x] Real-time metrics collection (CPU, RAM, disk, network)
+- [x] WebSocket live updates
+- [x] Uptime monitoring with historical tracking
+- [x] Centralized log aggregation
+- [x] Alert rules with webhook notifications
+- [x] Multi-agent support
+- [x] Docker deployment with pre-built images
+- [x] TimescaleDB for efficient time-series storage
 - [ ] Multi-tenant support
-- [ ] Grafana-style query builder
+- [ ] Email notifications
+- [ ] Grafana integration
 
 ## License
 
