@@ -21,6 +21,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY *.py ./
+COPY routers/ ./routers/
+COPY static/ ./static/
+COPY migrations/ ./migrations/
+COPY alembic.ini ./
 
 # Copy Scribe binaries (built by CI)
 COPY scribe-bin/ /app/scribe-bin/
