@@ -1,0 +1,56 @@
+# Example configuration file for Scribe Agent
+{
+  # LogLibrarian backend server address (host:port)
+  "server_host": "127.0.0.1:8000",
+  
+  # Human-readable name for this agent (defaults to hostname)
+  "agent_name": "my-server-01",
+  
+  # Path to log file to monitor
+  # Linux examples:
+  #   - "/var/log/syslog"
+  #   - "/var/log/messages"
+  #   - "/var/log/nginx/access.log"
+  # Windows examples:
+  #   - "C:\\Windows\\System32\\winevt\\Logs\\Application.evtx"
+  #   - "C:\\inetpub\\logs\\LogFiles\\W3SVC1\\u_ex*.log"
+  "log_file": "./test.log",
+
+  # Security log paths (Linux only, optional)
+  # Array of paths to antivirus/security scanner logs
+  # On Windows, this is ignored - Windows Defender logs are collected automatically
+  # Linux examples:
+  #   ["/var/log/clamav/clamav.log"]                    - ClamAV only
+  #   ["/var/log/fail2ban.log"]                         - Fail2ban only
+  #   ["/var/log/clamav/clamav.log", "/var/log/fail2ban.log"]  - Multiple
+  #   ["/var/log/rkhunter.log"]                         - Rootkit Hunter
+  #   ["/var/log/ossec/alerts/alerts.log"]              - OSSEC HIDS
+  "security_log_paths": [],
+  
+  # Interval between metric collections (seconds)
+  # Lower = more frequent updates, higher CPU/network usage
+  # Recommended: 60 for production, 10 for development
+  "metrics_interval": 60,
+  
+  # Number of log lines to batch before sending
+  # Higher = fewer network requests, but more memory usage
+  # Recommended: 50-100
+  "log_batch_size": 50,
+  
+  # Maximum time between log batches (seconds)
+  # Ensures logs are sent even if batch size not reached
+  # Recommended: 5-10
+  "log_batch_interval": 5,
+  
+  # Enable SSL/TLS (use wss:// and https://)
+  # Set to true for production deployments
+  "ssl_enabled": false,
+  
+  # Verify SSL certificates
+  # Set to false only for self-signed certificates in development
+  "ssl_verify": true,
+  
+  # Unique agent ID (auto-generated if empty)
+  # Leave empty for first run
+  "agent_id": ""
+}

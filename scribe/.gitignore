@@ -1,0 +1,11 @@
+# Scribe - LogLibrarian Agent
+
+# Binaries
+scribe
+scribe.exe
+scribe-*
+bin/
+
+# Logs
+*.log
+test.log

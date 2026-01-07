@@ -1,0 +1,70 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Environment and secrets
+.env
+.env.local
+*.pem
+*.key
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node.js (dashboard)
+node_modules/
+
+# Go binaries (scribe)
+scribe/scribe
+scribe/scribe.exe
+scribe/scribe-agent
+scribe/scribe-linux
+scribe/scribe-windows.exe
+scribe/bin/
+*.exe
+
+# Scribe runtime files
+scribe/config.json
+scribe/scribe_health.json
+scribe/scribe_state.json
+scribe/test.log
+
+# Librarian runtime files
+librarian/loglibrarian.db
+librarian/data/
+librarian/ai_audit.log
+
+# Docker
+docker-compose.override.yml
+
+# Build artifacts
+*.tar
+*.tar.gz
+*.zip

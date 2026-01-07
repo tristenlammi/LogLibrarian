@@ -1,0 +1,208 @@
+# LogLibrarian - TimescaleDB Edition
+# Default production setup with:
+# - TimescaleDB for time-series data and all storage
+# - Redis for message queue
+# - Qdrant for vector search
+# - Librarian backend (FastAPI)
+# - Dashboard frontend (Vue.js)
+
+services:
+  # TimescaleDB (PostgreSQL with time-series extensions)
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: loglibrarian-timescaledb
+    # ports:
+    #   - "5432:5432"  # Uncomment only if you need external DB access
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: loglibrarian
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+      - ./librarian/init_timescaledb.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - loglibrarian
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d loglibrarian"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Message Queue
+  redis:
+    image: redis:7-alpine
+    container_name: loglibrarian-redis
+    # ports:
+    #   - "6379:6379"  # Uncomment only if you need external Redis access
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - loglibrarian
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Qdrant Vector Database
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: loglibrarian-qdrant
+    # ports:
+    #   - "6333:6333"  # Uncomment only if you need external Qdrant access
+    #   - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    networks:
+      - loglibrarian
+    restart: unless-stopped
+
+  # Librarian Backend (Python FastAPI)
+  librarian:
+    build:
+      context: ./librarian
+      dockerfile: Dockerfile
+    container_name: loglibrarian-backend
+    ports:
+      - "8000:8000"
+    
+    # ╔══════════════════════════════════════════════════════════════════════════╗
+    # ║                        GPU ACCELERATION SETUP                            ║
+    # ║                                                                          ║
+    # ║  Uncomment ONE of the sections below based on your GPU.                  ║
+    # ║  GPU acceleration is OPTIONAL - CPU works fine for smaller models.       ║
+    # ║                                                                          ║
+    # ║  NOTE: GPU passthrough requires Linux. Windows users should either:      ║
+    # ║        - Run the backend natively (not in Docker)                        ║
+    # ║        - Use WSL2 with Linux Docker                                      ║
+    # ╚══════════════════════════════════════════════════════════════════════════╝
+    
+    # ┌──────────────────────────────────────────────────────────────────────────┐
+    # │ NVIDIA GPU (CUDA) - Most common, best supported                          │
+    # │                                                                          │
+    # │ Prerequisites:                                                           │
+    # │   1. Install NVIDIA drivers on host                                      │
+    # │   2. Install NVIDIA Container Toolkit:                                   │
+    # │      curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey \    │
+    # │        | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container.gpg  │
+    # │      sudo apt-get install -y nvidia-container-toolkit                    │
+    # │      sudo nvidia-ctk runtime configure --runtime=docker                  │
+    # │      sudo systemctl restart docker                                       │
+    # │                                                                          │
+    # │ Uncomment below to enable:                                               │
+    # └──────────────────────────────────────────────────────────────────────────┘
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    
+    # ┌──────────────────────────────────────────────────────────────────────────┐
+    # │ AMD GPU (ROCm) - For Radeon RX 6000/7000/9000 series                     │
+    # │                                                                          │
+    # │ Prerequisites:                                                           │
+    # │   1. Install ROCm on host (Ubuntu 22.04/24.04 recommended):              │
+    # │      sudo apt-get install rocm-hip-libraries rocm-dev                    │
+    # │   2. Add user to video and render groups:                                │
+    # │      sudo usermod -aG video,render $USER                                 │
+    # │   3. Verify with: rocm-smi                                               │
+    # │                                                                          │
+    # │ Uncomment below to enable:                                               │
+    # └──────────────────────────────────────────────────────────────────────────┘
+    # devices:
+    #   - /dev/kfd:/dev/kfd
+    #   - /dev/dri:/dev/dri
+    # group_add:
+    #   - video
+    #   - render
+    # security_opt:
+    #   - seccomp:unconfined
+    
+    # ┌──────────────────────────────────────────────────────────────────────────┐
+    # │ Intel Arc GPU (SYCL/oneAPI) - For Arc A-series GPUs                      │
+    # │                                                                          │
+    # │ Prerequisites:                                                           │
+    # │   1. Install Intel GPU drivers and oneAPI:                               │
+    # │      sudo apt-get install intel-opencl-icd intel-level-zero-gpu         │
+    # │   2. Add user to render group:                                           │
+    # │      sudo usermod -aG render $USER                                       │
+    # │   3. Verify with: xpu-smi discovery                                      │
+    # │                                                                          │
+    # │ Uncomment below to enable:                                               │
+    # └──────────────────────────────────────────────────────────────────────────┘
+    # devices:
+    #   - /dev/dri:/dev/dri
+    # group_add:
+    #   - render
+    
+    environment:
+      # TimescaleDB configuration
+      DATABASE_URL: postgresql://postgres:postgres@timescaledb:5432/loglibrarian
+      USE_POSTGRES: "true"
+      USE_TIMESCALE: "true"
+      DB_POOL_MIN: "5"
+      DB_POOL_MAX: "20"
+      # Qdrant configuration
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: "6333"
+      # Redis configuration
+      REDIS_URL: redis://redis:6379
+      # Report storage
+      REPORT_STORAGE_ROOT: /storage/reports/profiles
+      # Authentication - IMPORTANT: Change this in production!
+      # Generate with: python -c "import secrets; print(secrets.token_urlsafe(32))"
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production-use-secrets-token}
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./librarian:/app
+      - ./scribe/bin:/app/scribe-bin
+      - librarian_data:/data
+      - report_storage:/storage
+    networks:
+      - loglibrarian
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  # Dashboard Frontend (Vue.js)
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: loglibrarian-dashboard
+    ports:
+      - "3000:80"
+    depends_on:
+      - librarian
+    networks:
+      - loglibrarian
+    restart: unless-stopped
+
+networks:
+  loglibrarian:
+    driver: bridge
+
+volumes:
+  timescale_data:
+    driver: local
+  redis_data:
+    driver: local
+  qdrant_storage:
+    driver: local
+  librarian_data:
+    driver: local
+  report_storage:
+    driver: local

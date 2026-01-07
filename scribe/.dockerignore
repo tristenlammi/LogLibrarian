@@ -1,0 +1,4 @@
+.dockerignore
+test.log
+scribe
+*.md
