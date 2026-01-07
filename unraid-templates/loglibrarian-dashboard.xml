@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>LogLibrarian-Dashboard</Name>
+  <Repository>ghcr.io/tristenlammi/loglibrarian-dashboard:latest</Repository>
+  <Registry>https://ghcr.io/tristenlammi/loglibrarian-dashboard</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/tristenlammi/LogLibrarian</Support>
+  <Project>https://github.com/tristenlammi/LogLibrarian</Project>
+  <Overview>LogLibrarian Dashboard - Web UI for log monitoring. Requires the LogLibrarian backend container.</Overview>
+  <Category>Tools: Network:Management</Category>
+  <WebUI>http://[IP]:[PORT:80]</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/tristenlammi/LogLibrarian/main/unraid-templates/loglibrarian-dashboard.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/tristenlammi/LogLibrarian/main/dashboard/public/favicon.svg</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled></DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Requires>LogLibrarian Backend</Requires>
+  <Config Name="Web UI Port" Target="80" Default="8080" Mode="tcp" Description="Dashboard web port" Type="Port" Display="always" Required="true" Mask="false">8080</Config>
+  <Config Name="Backend URL" Target="VITE_API_URL" Default="http://localhost:8000" Mode="" Description="URL to LogLibrarian backend API" Type="Variable" Display="always" Required="true" Mask="false">http://localhost:8000</Config>
+</Container>
