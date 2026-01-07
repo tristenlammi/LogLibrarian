@@ -78,7 +78,7 @@ LogLibrarian is a self-hosted log analysis platform with a Go-based agent (Scrib
 - **Status:** ✅ FIXED Jan 7 - Added non-root users (`librarian`, `scribe`) to Dockerfiles. Dashboard uses nginx which already runs workers as non-root.
 
 #### 10. Hardcoded Database Passwords
-- **Location:** `docker-compose.yml`, `docker-compose.postgres.yml`
+- **Location:** `docker-compose.yml`
 - **Issue:** `POSTGRES_PASSWORD: postgres` hardcoded in compose files.
 - **Fix:** Use environment variables or Docker secrets.
 

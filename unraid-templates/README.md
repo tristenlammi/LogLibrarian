@@ -13,7 +13,7 @@ This is the easiest method as LogLibrarian has multiple dependent services.
 1. Go to **Docker** → **Compose**
 2. Click **Add New Stack**
 3. Name it `loglibrarian`
-4. Paste the contents of `docker-compose.postgres.yml` from this repo
+4. Paste the contents of `docker-compose.yml` from this repo
 5. Modify the `SECRET_KEY` environment variable (generate a random string)
 6. Click **Save Changes** then **Compose Up**
 
