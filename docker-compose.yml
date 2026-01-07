@@ -2,7 +2,6 @@
 # Default production setup with:
 # - TimescaleDB for time-series data and all storage
 # - Redis for message queue
-# - Qdrant for vector search
 # - Librarian backend (FastAPI)
 # - Dashboard frontend (Vue.js)
 
@@ -46,19 +45,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
-
-  # Qdrant Vector Database
-  qdrant:
-    image: qdrant/qdrant:latest
-    container_name: loglibrarian-qdrant
-    # ports:
-    #   - "6333:6333"  # Uncomment only if you need external Qdrant access
-    #   - "6334:6334"
-    volumes:
-      - qdrant_storage:/qdrant/storage
-    networks:
-      - loglibrarian
-    restart: unless-stopped
 
   # Librarian Backend (Python FastAPI)
   librarian:
@@ -147,9 +133,6 @@ services:
       USE_TIMESCALE: "true"
       DB_POOL_MIN: "5"
       DB_POOL_MAX: "20"
-      # Qdrant configuration
-      QDRANT_HOST: qdrant
-      QDRANT_PORT: "6333"
       # Redis configuration
       REDIS_URL: redis://redis:6379
       # Report storage
@@ -199,8 +182,6 @@ volumes:
   timescale_data:
     driver: local
   redis_data:
-    driver: local
-  qdrant_storage:
     driver: local
   librarian_data:
     driver: local

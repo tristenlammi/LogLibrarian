@@ -9,7 +9,7 @@
   <Privileged>false</Privileged>
   <Support>https://github.com/tristenlammi/LogLibrarian</Support>
   <Project>https://github.com/tristenlammi/LogLibrarian</Project>
-  <Overview>LogLibrarian is a self-hosted log monitoring and analysis platform. This container is the backend API server. Requires TimescaleDB, Redis, and Qdrant containers.</Overview>
+  <Overview>LogLibrarian is a self-hosted log monitoring and analysis platform. This container is the backend API server. Requires TimescaleDB and Redis containers.</Overview>
   <Category>Tools: Network:Management</Category>
   <WebUI>http://[IP]:[PORT:8000]/docs</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/tristenlammi/LogLibrarian/main/unraid-templates/loglibrarian-backend.xml</TemplateURL>
@@ -20,11 +20,10 @@
   <DateInstalled></DateInstalled>
   <DonateText/>
   <DonateLink/>
-  <Requires>TimescaleDB, Redis, Qdrant</Requires>
+  <Requires>TimescaleDB, Redis</Requires>
   <Config Name="Web UI Port" Target="8000" Default="8000" Mode="tcp" Description="API port" Type="Port" Display="always" Required="true" Mask="false">8000</Config>
   <Config Name="Database URL" Target="DATABASE_URL" Default="postgresql://postgres:postgres@timescaledb:5432/loglibrarian" Mode="" Description="PostgreSQL/TimescaleDB connection string" Type="Variable" Display="always" Required="true" Mask="false">postgresql://postgres:postgres@timescaledb:5432/loglibrarian</Config>
   <Config Name="Redis URL" Target="REDIS_URL" Default="redis://redis:6379" Mode="" Description="Redis connection string" Type="Variable" Display="always" Required="true" Mask="false">redis://redis:6379</Config>
-  <Config Name="Qdrant URL" Target="QDRANT_URL" Default="http://qdrant:6333" Mode="" Description="Qdrant vector database URL" Type="Variable" Display="always" Required="true" Mask="false">http://qdrant:6333</Config>
   <Config Name="Secret Key" Target="SECRET_KEY" Default="" Mode="" Description="Secret key for JWT tokens (generate a random string)" Type="Variable" Display="always" Required="true" Mask="true"></Config>
   <Config Name="Use Postgres" Target="USE_POSTGRES" Default="true" Mode="" Description="Use PostgreSQL/TimescaleDB backend" Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
   <Config Name="Data" Target="/data" Default="/mnt/user/appdata/loglibrarian/data" Mode="rw" Description="Data directory" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/loglibrarian/data</Config>

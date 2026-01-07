@@ -20,11 +20,10 @@ This is the easiest method as LogLibrarian has multiple dependent services.
 The services will start:
 - **TimescaleDB** (PostgreSQL with time-series extensions)
 - **Redis** (caching and message queue)
-- **Qdrant** (vector database for AI features)
 - **LogLibrarian Backend** (API server)
 - **LogLibrarian Dashboard** (Web UI)
 
-Access the dashboard at `http://YOUR_UNRAID_IP:8080`
+Access the dashboard at `http://YOUR_UNRAID_IP:3000`
 
 ---
 
@@ -37,7 +36,6 @@ If you prefer Unraid's native Docker management:
 From Community Applications, install:
 - **TimescaleDB** (or PostgreSQL)
 - **Redis**
-- **Qdrant** (optional, for AI features)
 
 ### Step 2: Add Template Repository
 
@@ -82,7 +80,6 @@ Or use Unraid's built-in `br0` network with static IPs.
 ### Backend (Optional)
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `QDRANT_URL` | Qdrant vector DB | `http://qdrant:6333` |
 | `LOG_LEVEL` | Logging verbosity | `INFO` |
 
 ### Dashboard
@@ -98,10 +95,9 @@ Map these volumes for data persistence:
 
 | Container | Path | Purpose |
 |-----------|------|---------|
-| Backend | `/data` | AI models, local data |
+| Backend | `/data` | Local data |
 | TimescaleDB | `/var/lib/postgresql/data` | Database files |
 | Redis | `/data` | Cache persistence |
-| Qdrant | `/qdrant/storage` | Vector embeddings |
 
 Recommended location: `/mnt/user/appdata/loglibrarian/`
 
@@ -111,10 +107,9 @@ Recommended location: `/mnt/user/appdata/loglibrarian/`
 
 | Service | Port | Purpose |
 |---------|------|---------|
-| Dashboard | 8080 | Web UI |
+| Dashboard | 3000 | Web UI |
 | Backend | 8000 | API & WebSocket |
 | TimescaleDB | 5432 | Database (internal only) |
 | Redis | 6379 | Cache (internal only) |
-| Qdrant | 6333 | Vectors (internal only) |
 
-Only expose 8080 (dashboard) and 8000 (backend) externally.
+Only expose 3000 (dashboard) and 8000 (backend) externally.

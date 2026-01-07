@@ -238,7 +238,6 @@ const faqs = [
       <ul>
         <li><strong>8000</strong> - Backend API and WebSocket connections</li>
         <li><strong>5173</strong> - Dashboard (dev mode)</li>
-        <li><strong>6333</strong> - Qdrant vector database</li>
       </ul>`
   },
   {

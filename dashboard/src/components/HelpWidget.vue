@@ -379,16 +379,7 @@ const features = [
       { name: 'Visual Indicators', description: 'Badge counts on agent cards show active alerts.' },
     ]
   },
-  {
-    icon: '🤖',
-    title: 'AI-Powered Search',
-    features: [
-      { name: 'Natural Language Queries', description: 'Ask questions in plain English.' },
-      { name: 'Semantic Search', description: 'Find logs by meaning, not just keywords.' },
-      { name: 'Vector Embeddings', description: 'Powered by sentence-transformers and Qdrant.' },
-      { name: 'Context-Aware', description: 'Understands infrastructure terminology.' },
-    ]
-  },
+
   {
     icon: '⚙️',
     title: 'Administration',

@@ -71,7 +71,6 @@
             <div class="status-details mt-2">
               <small class="text-secondary">
                 <div>Backend: <span class="text-success">●</span> Online</div>
-                <div>Qdrant: <span class="text-success">●</span> Online</div>
               </small>
             </div>
           </div>
