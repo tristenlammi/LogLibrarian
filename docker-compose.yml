@@ -1,9 +1,6 @@
-# LogLibrarian - TimescaleDB Edition
-# Default production setup with:
-# - TimescaleDB for time-series data and all storage
-# - Redis for message queue
-# - Librarian backend (FastAPI)
-# - Dashboard frontend (Vue.js)
+# LogLibrarian - Production Setup
+# Uses pre-built images from GitHub Container Registry
+# Services: TimescaleDB, Redis, Backend, Dashboard
 
 services:
   # TimescaleDB (PostgreSQL with time-series extensions)
@@ -14,11 +11,10 @@ services:
     #   - "5432:5432"  # Uncomment only if you need external DB access
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: loglibrarian
     volumes:
       - timescale_data:/var/lib/postgresql/data
-      - ./librarian/init_timescaledb.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - loglibrarian
     restart: unless-stopped
@@ -48,15 +44,13 @@ services:
 
   # Librarian Backend (Python FastAPI)
   librarian:
-    build:
-      context: ./librarian
-      dockerfile: Dockerfile
+    image: ghcr.io/tristenlammi/loglibrarian-backend:latest
     container_name: loglibrarian-backend
     ports:
       - "8000:8000"
     environment:
       # TimescaleDB configuration
-      DATABASE_URL: postgresql://postgres:postgres@timescaledb:5432/loglibrarian
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@timescaledb:5432/loglibrarian
       USE_POSTGRES: "true"
       USE_TIMESCALE: "true"
       DB_POOL_MIN: "5"
@@ -74,8 +68,6 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./librarian:/app
-      - ./scribe/bin:/app/scribe-bin
       - librarian_data:/data
       - report_storage:/storage
     networks:
@@ -90,9 +82,7 @@ services:
 
   # Dashboard Frontend (Vue.js)
   dashboard:
-    build:
-      context: ./dashboard
-      dockerfile: Dockerfile
+    image: ghcr.io/tristenlammi/loglibrarian-dashboard:latest
     container_name: loglibrarian-dashboard
     ports:
       - "3000:80"

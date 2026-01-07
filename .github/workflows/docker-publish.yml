@@ -11,8 +11,44 @@ env:
   IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/loglibrarian
 
 jobs:
+  build-scribe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+
+      - name: Build Scribe binaries
+        working-directory: ./scribe
+        run: |
+          mkdir -p bin
+          
+          # Linux AMD64
+          GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/scribe-linux-amd64 .
+          
+          # Linux ARM64
+          GOOS=linux GOARCH=arm64 go build -ldflags="-s -w" -o bin/scribe-linux-arm64 .
+          
+          # Windows AMD64
+          GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o bin/scribe-windows-amd64.exe .
+          
+          # List built binaries
+          ls -la bin/
+
+      - name: Upload Scribe binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: scribe-binaries
+          path: scribe/bin/
+          retention-days: 1
+
   build-and-push:
     runs-on: ubuntu-latest
+    needs: build-scribe
     permissions:
       contents: read
       packages: write
@@ -20,6 +56,17 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Download Scribe binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: scribe-binaries
+          path: librarian/scribe-bin/
+
+      - name: Verify binaries
+        run: |
+          ls -la librarian/scribe-bin/
+          chmod +x librarian/scribe-bin/*
 
       - name: Log in to Container Registry
         uses: docker/login-action@v3

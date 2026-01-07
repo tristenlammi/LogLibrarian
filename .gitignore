@@ -48,6 +48,10 @@ scribe/scribe-agent
 scribe/scribe-linux
 scribe/scribe-windows.exe
 scribe/bin/
+
+# Scribe binaries in librarian (CI builds these)
+librarian/scribe-bin/*
+!librarian/scribe-bin/README.md
 *.exe
 
 # Scribe runtime files

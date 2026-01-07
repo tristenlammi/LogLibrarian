@@ -22,8 +22,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY *.py ./
 
-# Create directory for SQLite database and set ownership
-RUN mkdir -p /data && chown -R librarian:librarian /data /app
+# Copy Scribe binaries (built by CI)
+COPY scribe-bin/ /app/scribe-bin/
+RUN chmod +x /app/scribe-bin/* 2>/dev/null || true
+
+# Create directories and set ownership
+RUN mkdir -p /data /storage && chown -R librarian:librarian /data /app /storage
 
 # Switch to non-root user
 USER librarian
