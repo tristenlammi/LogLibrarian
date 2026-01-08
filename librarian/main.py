@@ -5511,6 +5511,11 @@ async def generate_stat_report(
             else:
                 health_status = "unknown"
             
+            # Include scribe uptime in global calculation
+            if uptime_pct is not None:
+                total_uptime_sum += uptime_pct
+                total_monitors_with_data += 1
+            
             scribes_summary.append({
                 "name": display_name,
                 "agent_id": agent_id,
