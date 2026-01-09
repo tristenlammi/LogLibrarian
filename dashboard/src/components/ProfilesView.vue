@@ -96,7 +96,7 @@
                   {{ getFrequencyLabel(profile.frequency) }}
                 </span>
               </td>
-              <td class="text-center text-muted">
+              <td class="text-center">
                 {{ getNextRun(profile) }}
               </td>
               <td class="text-center">
