@@ -1,135 +1,144 @@
 <template>
   <div class="profiles-view">
-    <!-- Header Card -->
-    <div class="row g-3 mb-4">
-      <div class="col-12">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-3">
-              <h5 class="mb-0">Report Profiles</h5>
-              <span class="badge bg-primary">{{ profiles.length }} profiles</span>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-              <!-- Search Bar -->
-              <div class="search-wrapper">
-                <input 
-                  type="text" 
-                  class="form-control form-control-sm search-input"
-                  v-model="searchQuery"
-                  placeholder="Search profiles..."
-                >
-                <span class="search-icon">🔍</span>
-              </div>
-              <!-- Create Profile Button -->
-              <button 
-                v-if="isAdmin"
-                class="btn btn-sm btn-success d-flex align-items-center gap-1"
-                @click="openCreateProfile"
-              >
-                <span style="font-size: 1.1rem">+</span>
-                <span>Create Profile</span>
-              </button>
-            </div>
-          </div>
-          
-          <div class="card-body">
-            <!-- Loading State -->
-            <div v-if="loading" class="text-center py-5">
-              <div class="spinner-border text-primary mb-3" role="status"></div>
-              <div class="text-secondary">Loading profiles...</div>
-            </div>
-
-            <!-- Empty State -->
-            <div v-else-if="profiles.length === 0" class="text-center py-5">
-              <div class="text-secondary">
-                <div class="mb-3" style="font-size: 3rem">📊</div>
-                <h5>No report profiles yet</h5>
-                <p class="text-muted mb-4">Create a profile to generate executive summaries for your infrastructure</p>
-                <button v-if="isAdmin" class="btn btn-success" @click="openCreateProfile">
-                  <span class="me-1">+</span> Create Your First Profile
-                </button>
-              </div>
-            </div>
-
-            <!-- No Search Results -->
-            <div v-else-if="filteredProfiles.length === 0" class="text-center py-5">
-              <div class="text-secondary">
-                <div class="mb-3" style="font-size: 2rem">🔍</div>
-                <h6>No profiles match "{{ searchQuery }}"</h6>
-                <button class="btn btn-sm btn-outline-secondary mt-2" @click="searchQuery = ''">
-                  Clear search
-                </button>
-              </div>
-            </div>
-
-            <!-- Profiles Table -->
-            <div v-else class="table-responsive">
-              <table class="table table-dark table-hover mb-0 profiles-table">
-                <thead>
-                  <tr>
-                    <th>Profile Name</th>
-                    <th class="text-center" style="width: 100px">Scribes</th>
-                    <th class="text-center" style="width: 100px">Bookmarks</th>
-                    <th class="text-center" style="width: 120px">Schedule</th>
-                    <th class="text-center" style="width: 140px">Next Run</th>
-                    <th class="text-center" style="width: 180px">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="profile in filteredProfiles" :key="profile.id">
-                    <td>
-                      <div class="profile-name-cell">
-                        <span class="profile-name">{{ profile.name }}</span>
-                        <span v-if="profile.description" class="profile-desc text-muted">{{ profile.description }}</span>
-                      </div>
-                    </td>
-                    <td class="text-center">
-                      <span class="badge bg-secondary">{{ getScribeCount(profile) }}</span>
-                    </td>
-                    <td class="text-center">
-                      <span class="badge bg-secondary">{{ getBookmarkCount(profile) }}</span>
-                    </td>
-                    <td class="text-center">
-                      <span class="schedule-badge" :class="getScheduleClass(profile.frequency)">
-                        {{ getFrequencyLabel(profile.frequency) }}
-                      </span>
-                    </td>
-                    <td class="text-center text-muted">
-                      {{ getNextRun(profile) }}
-                    </td>
-                    <td class="text-center">
-                      <div class="action-buttons">
-                        <button 
-                          class="btn btn-sm btn-outline-primary"
-                          @click="openReportsModal(profile)"
-                          title="View Reports"
-                        >
-                          Reports
-                        </button>
-                        <button 
-                          v-if="isAdmin"
-                          class="btn btn-sm btn-outline-secondary"
-                          @click="openEditProfile(profile)"
-                          title="Edit Profile"
-                        >
-                          Edit
-                        </button>
-                        <button 
-                          v-if="isAdmin"
-                          class="btn btn-sm btn-outline-danger"
-                          @click="confirmDelete(profile)"
-                          title="Delete Profile"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+    <!-- Modern Header -->
+    <div class="profiles-header">
+      <div class="header-left">
+        <h2 class="page-title">Report Profiles</h2>
+        <span class="count-badge">{{ profiles.length }}</span>
+      </div>
+      <div class="header-right">
+        <!-- Search Bar -->
+        <div class="search-wrapper">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="m21 21-4.3-4.3"></path>
+          </svg>
+          <input 
+            type="text" 
+            class="search-input"
+            v-model="searchQuery"
+            placeholder="Search profiles..."
+          >
         </div>
+        <!-- Create Profile Button -->
+        <button 
+          v-if="isAdmin"
+          class="btn btn-success d-flex align-items-center gap-2"
+          @click="openCreateProfile"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          <span>Create Profile</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Content Area -->
+    <div class="profiles-content">
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <div class="text-secondary">Loading profiles...</div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else-if="profiles.length === 0" class="empty-state">
+        <div class="empty-icon">📊</div>
+        <h5>No report profiles yet</h5>
+        <p class="text-muted mb-4">Create a profile to generate executive summaries for your infrastructure</p>
+        <button v-if="isAdmin" class="btn btn-success" @click="openCreateProfile">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Create Your First Profile
+        </button>
+      </div>
+
+      <!-- No Search Results -->
+      <div v-else-if="filteredProfiles.length === 0" class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h6>No profiles match "{{ searchQuery }}"</h6>
+        <button class="btn btn-sm btn-outline-secondary mt-2" @click="searchQuery = ''">
+          Clear search
+        </button>
+      </div>
+
+      <!-- Profiles Table -->
+      <div v-else class="table-responsive">
+        <table class="profiles-table">
+          <thead>
+            <tr>
+              <th>Profile Name</th>
+              <th class="text-center" style="width: 100px">Scribes</th>
+              <th class="text-center" style="width: 100px">Bookmarks</th>
+              <th class="text-center" style="width: 120px">Schedule</th>
+              <th class="text-center" style="width: 140px">Next Run</th>
+              <th class="text-center" style="width: 140px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="profile in filteredProfiles" :key="profile.id">
+              <td>
+                <div class="profile-name-cell">
+                  <span class="profile-name">{{ profile.name }}</span>
+                  <span v-if="profile.description" class="profile-desc">{{ profile.description }}</span>
+                </div>
+              </td>
+              <td class="text-center">
+                <span class="pill-badge">{{ getScribeCount(profile) }}</span>
+              </td>
+              <td class="text-center">
+                <span class="pill-badge">{{ getBookmarkCount(profile) }}</span>
+              </td>
+              <td class="text-center">
+                <span class="schedule-badge" :class="getScheduleClass(profile.frequency)">
+                  {{ getFrequencyLabel(profile.frequency) }}
+                </span>
+              </td>
+              <td class="text-center text-muted">
+                {{ getNextRun(profile) }}
+              </td>
+              <td class="text-center">
+                <div class="action-buttons">
+                  <button 
+                    class="icon-btn icon-btn-primary"
+                    @click="openReportsModal(profile)"
+                    title="View Reports"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                      <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                  </button>
+                  <button 
+                    v-if="isAdmin"
+                    class="icon-btn icon-btn-secondary"
+                    @click="openEditProfile(profile)"
+                    title="Edit Profile"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                      <path d="m15 5 4 4"/>
+                    </svg>
+                  </button>
+                  <button 
+                    v-if="isAdmin"
+                    class="icon-btn icon-btn-danger"
+                    @click="confirmDelete(profile)"
+                    title="Delete Profile"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h18"/>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                      <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -1352,57 +1361,141 @@ async function deleteProfile() {
   width: 100%;
 }
 
+/* Modern Header */
+.profiles-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+  margin: 0;
+}
+
+.count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 0.5rem;
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Search Input */
 .search-wrapper {
   position: relative;
 }
 
 .search-input {
-  padding-left: 2rem;
-  background: var(--bg-secondary, #2a2a2a);
-  border: 1px solid var(--border-color, #444);
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  background: rgba(30, 30, 46, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
   color: var(--text-primary, #fff);
-  min-width: 200px;
+  min-width: 220px;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(30, 30, 46, 1);
 }
 
 .search-input::placeholder {
-  color: var(--text-secondary, #888);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .search-icon {
   position: absolute;
-  left: 0.5rem;
+  left: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.9rem;
-  opacity: 0.6;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
 }
 
+/* Content Area */
+.profiles-content {
+  background: transparent;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* Modern Table */
 .profiles-table {
+  width: 100%;
   border-collapse: separate;
   border-spacing: 0;
+  background: rgba(30, 30, 46, 0.4);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .profiles-table th {
-  background: var(--bg-secondary, #2a2a2a);
-  border-bottom: 2px solid var(--border-color, #444);
-  font-weight: 600;
-  font-size: 0.85rem;
+  background: transparent;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: 500;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: var(--text-secondary, #aaa);
-  padding: 0.75rem 1rem;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 1rem;
 }
 
 .profiles-table td {
   padding: 1rem;
   vertical-align: middle;
-  border-bottom: 1px solid var(--border-color, #333);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-primary, #fff);
+}
+
+.profiles-table tbody tr {
+  transition: background 0.15s ease;
 }
 
 .profiles-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
 }
 
+.profiles-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Profile Name Cell */
 .profile-name-cell {
   display: flex;
   flex-direction: column;
@@ -1415,60 +1508,118 @@ async function deleteProfile() {
 }
 
 .profile-desc {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
   max-width: 300px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.schedule-badge {
-  display: inline-block;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
+/* Pill Badge */
+.pill-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  padding: 0.25rem 0.625rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
   font-size: 0.8rem;
   font-weight: 500;
 }
 
+/* Schedule Badge */
+.schedule-badge {
+  display: inline-block;
+  padding: 0.25rem 0.625rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
 .schedule-weekly {
-  background: rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.15);
   color: #60a5fa;
 }
 
 .schedule-monthly {
-  background: rgba(34, 197, 94, 0.2);
+  background: rgba(34, 197, 94, 0.15);
   color: #4ade80;
 }
 
 .schedule-quarterly {
-  background: rgba(168, 85, 247, 0.2);
+  background: rgba(168, 85, 247, 0.15);
   color: #c084fc;
 }
 
 .schedule-annually {
-  background: rgba(234, 179, 8, 0.2);
+  background: rgba(234, 179, 8, 0.15);
   color: #fbbf24;
 }
 
 .schedule-daily {
-  background: rgba(236, 72, 153, 0.2);
+  background: rgba(236, 72, 153, 0.15);
   color: #f472b6;
 }
 
 .schedule-manual {
-  background: rgba(107, 114, 128, 0.2);
+  background: rgba(107, 114, 128, 0.15);
   color: #9ca3af;
 }
 
+/* Icon Action Buttons */
 .action-buttons {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.375rem;
   justify-content: center;
 }
 
-.action-buttons .btn {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.85rem;
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-btn-primary {
+  color: rgba(96, 165, 250, 0.8);
+}
+
+.icon-btn-primary:hover {
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+.icon-btn-secondary {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.icon-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.icon-btn-danger {
+  color: rgba(248, 113, 113, 0.7);
+}
+
+.icon-btn-danger:hover {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
 }
 
 /* Modal Styles */
